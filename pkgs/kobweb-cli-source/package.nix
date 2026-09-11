@@ -62,7 +62,7 @@ stdenv.mkDerivation (finalAttrs: {
     changelog = "https://github.com/varabyte/kobweb-cli/releases/tag/v${finalAttrs.version}";
     description = "CLI binary that drives the interactive Kobweb experience";
     mainProgram = "kobweb";
-    platforms = lib.platforms.linux;
+    platforms = lib.platforms.unix;
     license = lib.licenses.asl20;
   };
 })
