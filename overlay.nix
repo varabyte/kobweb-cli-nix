@@ -1,4 +1,4 @@
 final: prev: {
-  kobweb-cli = final.callPackage ./pkgs/kobweb-cli/package.nix { };
-  kobweb-cli-source = final.callPackage ./pkgs/kobweb-cli-source/package.nix { };
+  kobweb-cli-bin = final.callPackage ./pkgs/kobweb-cli-bin/package.nix { };
+  kobweb-cli-src = final.callPackage ./pkgs/kobweb-cli-src/package.nix { };
 }

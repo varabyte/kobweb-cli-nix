@@ -7,7 +7,7 @@
   jdk ? pkgs.jdk25,
 }:
 stdenvNoCC.mkDerivation (finalAttrs: {
-  pname = "kobweb-cli";
+  pname = "kobweb-cli-bin";
   version = "0.9.23";
 
   src = fetchurl {

@@ -16,7 +16,7 @@ let
   }).wrapped;
 in
 stdenv.mkDerivation (finalAttrs: {
-  pname = "kobweb-cli-source";
+  pname = "kobweb-cli-src";
   version = "0.9.23";
 
   src = fetchFromGitHub {
