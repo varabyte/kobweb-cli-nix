@@ -1,62 +1,42 @@
 {
   lib,
-  stdenv,
-  fetchFromGitHub,
-  makeWrapper,
-  nix-update-script,
-  jdk21,
-  gradle-packages,
+  stdenvNoCC,
+  pkgs,
+  fetchurl,
+  unzip,
+  jdk ? pkgs.jdk25,
 }:
-let
-  gradle = (gradle-packages.mkGradle {
-    version = "9.7.1";
-    hash = "sha256-rNU/HtrwLxqP+Zh5+KNLMCZhoFfZsGOunjW1UvgE0go=";
-    defaultJava = jdk21;
-  }).wrapped;
-in
-stdenv.mkDerivation (finalAttrs: {
+stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "kobweb-cli";
   version = "0.9.23";
 
-  src = fetchFromGitHub {
-    owner = "varabyte";
-    repo = "kobweb-cli";
-    tag = "v${finalAttrs.version}";
-    hash = "sha256-+rT7GH5rYkYUxKZta1aM3Cf+XcmJW/XGEjLdhzQxAUk=";
+  src = fetchurl {
+    url = "https://github.com/varabyte/kobweb-cli/releases/download/v${finalAttrs.version}/kobweb-${finalAttrs.version}.zip";
+    hash = "sha256:75e92124e6f8c54814fbbab8615add5a68f2a264386bdc7d767b33e27cbe0087"; # Copied from GitHub. Nix converts it to base64 SRI internally
   };
 
-  gradleFlags = [ "-Dfile.encoding=utf-8" ];
+  nativeBuildInputs = [ unzip ];
 
-  gradleUpdateTask = "dependencies --write-verification-metadata sha256";
-  gradleBuildTask = "assembleShadowDist";
-
-  nativeBuildInputs = [
-    gradle
-    makeWrapper
-  ];
-
-  mitmCache = gradle.fetchDeps {
-    pkg = finalAttrs.finalPackage;
-    data = ./deps.json;
-  };
-
-  strictDeps = true;
+  unpackPhase = ''
+    runHook preUnpack
+    unzip $src
+    cd kobweb-${finalAttrs.version}
+    substituteInPlace ./bin/kobweb \
+      --replace-fail 'JAVACMD=java' 'JAVACMD=${lib.getExe jdk}' \
+      --replace-fail 'if ! command -v java >/dev/null 2>&1' 'if [ ! -x "$JAVACMD" ]'
+    runHook postUnpack
+  '';
 
   installPhase = ''
     runHook preInstall
-    mkdir -p $out/bin
-    mkdir -p $out/lib
-    cp -r kobweb/build/scriptsShadow/* $out/bin
-    rm -f $out/bin/kobweb.bat
-    cp -r kobweb/build/libs/* $out/lib
+    mkdir -p $out/bin $out/lib
+    cp -r bin/* $out/bin
+    cp -r lib/* $out/lib
     chmod +x $out/bin/kobweb
-    wrapProgram $out/bin/kobweb \
-      --prefix PATH : ${jdk21}/bin
     runHook postInstall
   '';
 
-  passthru.updateScript = nix-update-script { };
-
+  
   meta = {
     homepage = "https://github.com/varabyte/kobweb-cli";
     changelog = "https://github.com/varabyte/kobweb-cli/releases/tag/v${finalAttrs.version}";

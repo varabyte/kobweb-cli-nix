@@ -19,7 +19,13 @@
           "aarch64-darwin"
         ];
         perSystem = { pkgs, ... }: {
-          packages.default = pkgs.callPackage ./pkgs/kobweb-cli/package.nix { };
+          packages = let 
+            kobweb-cli = pkgs.callPackage ./pkgs/kobweb-cli/package.nix { };
+          in {
+            inherit kobweb-cli;
+            kobweb-cli-source = pkgs.callPackage ./pkgs/kobweb-cli-source/package.nix { };
+            default = kobweb-cli;
+          };
         };
       }
     );
