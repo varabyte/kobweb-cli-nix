@@ -8,10 +8,14 @@ kotlin-js-store
 *.iml
 /*.ipr
 
-.idea
+/.idea
 
 # Gradle ignores
-.gradle
+/.gradle
 
 # Kotlin ignores
-.kotlin
+/.kotlin
+
+# Nix ignores
+/result
+/result-*
