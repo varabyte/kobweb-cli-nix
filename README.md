@@ -61,11 +61,12 @@ $ nix profile upgrade github:varabyte/kobweb-cli-nix
 
 ## Modifications
 
-The main (minor!) modifications we applied on top of the original work:
+The (minor!) modifications we applied on top of the original work:
 
-* Updated the package targets to support MacOS as well (and tested that it worked)
+* This README.
+* Updated the package targets to support MacOS as well (and tested that it worked).
 * Renamed the packages to `kobweb-cli-bin` and `kobweb-cli-src` which seemed to be a common convention in the Nix community.
-* Set this up in a way where we will update the packages automatically when a new version of the CLI is published.
+* Extract Kobweb metadata out into its own script so that we can overwrite it when we publish the Kobweb CLI workflow.
 
-We do not intend to maintain this list of modifications going forward, but you can always see the full list of
-changes by visited https://github.com/varabyte/kobweb-cli-nix/commits/main/. 
+We do not intend to maintain this list of modifications going forward, but you can always see a full accounting of
+changes by visiting https://github.com/varabyte/kobweb-cli-nix/commits/main/. 
