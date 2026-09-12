@@ -13,12 +13,11 @@
 
     packages = forAllSystems (system: let
       pkgs = import nixpkgs { inherit system; };
-      bin = pkgs.callPackage ./pkgs/kobweb-cli-bin/package.nix { };
-      src = pkgs.callPackage ./pkgs/kobweb-cli-src/package.nix { };
+      kobweb-cli-bin = pkgs.callPackage ./pkgs/kobweb-cli-bin/package.nix { };
+      kobweb-cli-src = pkgs.callPackage ./pkgs/kobweb-cli-src/package.nix { };
     in {
-      kobweb = bin;
-      kobweb-src = src;
-      default = bin;
+      inherit kobweb-cli-bin kobweb-cli-src;
+      default = kobweb-cli-bin;
     });
   };
 }

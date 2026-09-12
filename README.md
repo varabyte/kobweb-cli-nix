@@ -16,21 +16,14 @@ This project provides two packages:
 - `kobweb-cli-bin` - the Kobweb CLI binary, downloaded from the official release distribution.
 - `kobweb-cli-src` - the Kobweb CLI, built from the latest published tag branch.
 
-And their associated target names are:
-
-* `kobweb`
-* `kobweb-src`
-
-in case you want to reference them directly via their attribute names.
-
-The default package is `kobweb-cli-bin`.
+If not specified explicitly, the default package is `kobweb-cli-bin`.
 
 ## Usage
 
 ### Nix Flakes
 
-First (assuming Nix is already installed), you must enable flakes, which are widely used at this point but still
-technically experimental.
+First (assuming Nix is already installed), you must enable flakes, which are widely used by the Nix community at this
+point but still technically experimental.
 
 **If you are using Nix on Linux or Mac:**
 
@@ -50,13 +43,14 @@ nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
 ```bash
 $ nix profile install github:varabyte/kobweb-cli-nix
+# Test successful installation
 $ kobweb version
 ```
 
-If you'd prefer to instruct Nix to build the CLI from source:
+If you'd prefer to instruct Nix to build the CLI from source, use the `kobweb-cli-src` target:
 
 ```bash
-$ nix profile install github:varabyte/kobweb-cli-nix#kobweb-src
+$ nix profile install github:varabyte/kobweb-cli-nix#kobweb-cli-src
 ```
 
 ### Updating Kobweb
@@ -69,8 +63,8 @@ $ nix profile upgrade github:varabyte/kobweb-cli-nix
 
 The main (minor!) modifications we applied on top of the original work:
 
-* Updated the packages to support MacOS as well (plus testing that it worked)
-* Renamed the packages to `kobweb-cli-bin` and `kobweb-cli-src` which seemed to be a common convention.
+* Updated the package targets to support MacOS as well (and tested that it worked)
+* Renamed the packages to `kobweb-cli-bin` and `kobweb-cli-src` which seemed to be a common convention in the Nix community.
 * Set this up in a way where we will update the packages automatically when a new version of the CLI is published.
 
 We do not intend to maintain this list of modifications going forward, but you can always see the full list of
