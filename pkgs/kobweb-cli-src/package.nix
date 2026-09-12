@@ -9,21 +9,22 @@
   gradlePackage ? null
 }:
 let
+  gradleMetadata = import ../gradle-metadata.nix;
   gradleWrapped = if gradlePackage != null then gradlePackage else (gradle-packages.mkGradle {
-    version = "9.7.1";
-    hash = "sha256-rNU/HtrwLxqP+Zh5+KNLMCZhoFfZsGOunjW1UvgE0go=";
+    inherit (gradleMetadata) version hash;
     defaultJava = jdk;
   }).wrapped;
+  kobwebMetadata = import ../kobweb-metadata.nix;
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "kobweb-cli-src";
-  version = "0.9.23";
+  inherit (kobwebMetadata) version;
 
   src = fetchFromGitHub {
     owner = "varabyte";
     repo = "kobweb-cli";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-+rT7GH5rYkYUxKZta1aM3Cf+XcmJW/XGEjLdhzQxAUk=";
+    hash = kobwebMetadata.srcHash;
   };
 
   gradleFlags = [ "-Dfile.encoding=utf-8" ];
