@@ -172,7 +172,7 @@ haven't added your first package yet). We'll use a `let ... in` block to define 
 ```nix
 programs.nix-ld.enable = true; # So Kotlin/JS works
 environment.systemPackages = let
-  kobwebRepo = fetchTarball "https://github.com/varabyte/kobweb-cli-nix/archive/v0.9.23.tar.gz";
+  kobwebRepo = fetchTarball "https://github.com/varabyte/kobweb-cli-nix/archive/v0.9.24.tar.gz";
   kobweb = import kobwebRepo { inherit pkgs; };
 in with pkgs; [
   kobweb
