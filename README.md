@@ -238,6 +238,36 @@ rebuild:
 $ sudo nixos-rebuild switch
 ```
 
+## Miscellaneous
+
+### Enable `nix-ld` (NixOS only)
+
+The Kotlin/JS toolchain (which Kobweb relies on) downloads prebuilt binaries under the hood. On NixOS, those binaries
+will fail to run unless a setting called `nix-ld` is enabled.
+
+`nix-ld` acts as a bridge for running Linux binaries on NixOS. Standard executables are hardcoded to look for the dynamic
+system linker under `/lib64`, a path that does not exist on NixOS due to its isolated `/nix/store` architecture. Enabling
+`nix-ld` places a lightweight shim at the that standard path, which dynamically redirects the binary to the correct
+library paths inside the Nix Store.
+
+You'll know if you need it if you hit this error during the execution of Gradle tasks:
+```
+Execution failed for task ':kotlinNpmInstall'.
+> Process 'Resolving NPM dependencies using yarn' returns 127
+```
+
+If you see this, we recommend enabling the value explicitly in your Nix configuration.
+
+`/etc/nixos/configuration.nix`
+```diff
+{ pkgs, ... }: {
++ programs.nix-ld.enable = true;
+  environment.systemPackages = [
+    # ...
+  ];
+}
+```
+
 ## Modifications
 
 The (minor!) modifications we applied on top of the original work:
