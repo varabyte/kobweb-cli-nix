@@ -1,6 +1,6 @@
 # Nix support for Kobweb
 
-This project makes it easy for [Nix](https://nix.dev) users to use the latest Kobweb CLI. 
+This project makes it easy for [Nix](https://nix.dev) users to use the latest Kobweb CLI.
 
 It is a fork of [e-psi-lon/kobweb-cli-nix](https://github.com/e-psi-lon/kobweb-cli-nix), originally released under the MIT license which we are happy to carry forward.
 User [e-ψ-lon](https://github.com/e-psi-lon) did _all_ of the heavy lifting -- feature proposal, research, and implementation. We are forever
@@ -33,7 +33,7 @@ Create `~/.config/nix/nix.conf`
 experimental-features = nix-command flakes
 ```
 
-**Or, if NixOs:**
+**Or, if NixOS:**
 
 Edit `/etc/nixos/configuration.nix` and add somewhere:
 ```nix
@@ -56,17 +56,48 @@ If you'd prefer to instruct Nix to build the CLI from source, use the `kobweb-cl
 $ nix profile add github:varabyte/kobweb-cli-nix#kobweb-cli-src
 ```
 
-**Or, if NixOs:**
+**Or, if NixOS:**
 
 Understanding your `flake.nix` file is out of scope for this document, but if you already have one, open it up and add a
 reference to this project.
 
-If it exists, edit `/etc/nixos/flake.nix`:
-```nix
+For example, edit `/etc/nixos/flake.nix`:
+```diff
 inputs = {
+  nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   # ...
-  kobweb.url = "github:varabyte/kobweb-cli-nix";
-}
++ kobweb = {
++   url = "github:varabyte/kobweb-cli-nix";
++   inputs.nixpkgs.follows = "nixpkgs";
++ };
+};
+
+outputs = {
+  self,
+  nixpkgs,
+  # ...
++ kobweb,
+  ...
+}: {
+  nixosConfigurations.host = nixpkgs.lib.nixosSystem {
+    # ...
+    modules = [
+      {
+        nixpkgs.overlays = [
++         kobweb.overlays.default
+        ];
+      }
+
+      ./configuration.nix
+
+      ({ pkgs, ... }: {
+        environment.systemPackages = [
++         pkgs.kobweb-cli-bin
+        ];
+      })
+    ];
+  };
+};
 ```
 
 If you do not have one, you may consider copying this minimal `flake.nix`:
@@ -76,42 +107,49 @@ If you do not have one, you may consider copying this minimal `flake.nix`:
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    kobweb.url = "github:varabyte/kobweb-cli-nix";
+
+    kobweb = {
+      url = "github:varabyte/kobweb-cli-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs@{ self, nixpkgs, ... }: {
-    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-      specialArgs = { inherit inputs; };
-      modules = [ ./configuration.nix ];
+  outputs = { self, nixpkgs, kobweb, ... }: {
+    # Replace "<YOUR-HOSTNAME>"
+    nixosConfigurations.<YOUR-HOSTNAME> = nixpkgs.lib.nixosSystem {
+      modules = [
+        {
+          nixpkgs.overlays = [
+            kobweb.overlays.default
+          ];
+        }
+
+        ./configuration.nix
+
+        ({ pkgs, ... }: {
+          environment.systemPackages = [
+            pkgs.kobweb-cli-bin
+          ];
+        })
+      ];
     };
   };
 }
 ```
+> [!IMPORTANT]
+> Replace `<YOUR-HOSTNAME>` above. In a terminal, run `hostname` to get the value to use here.
+
 > [!WARNING]
 > The first time this flake is built, Nix will fetch the `nixpkgs` repository tree. This requires ~5–6 GiB of bandwidth
 > and disk space in `/nix/store`. Ensure you have sufficient disk space before rebuilding with this flake.
 
-Once your flake is ready, edit `/etc/nixos/configuration.nix`, search for the `systemPackages` line, and add a reference to
-the `kobweb` input. You should _also_ enable `nix-ld` at this time, as Kotlin/JS builds won't succeed without it.
-```nix
-# Make sure "inputs" is specified at the top of your file:
-{ config, pkgs, inputs, ... } :
-
-# ...
-
-programs.nix-ld.enable = true; # So Kotlin/JS works
-environment.systemPackages = with pkgs; [
-  inputs.kobweb.packages.${pkgs.system}.default
-];
-```
-
-and then rebuild:
+When ready, rebuild:
 ```bash
 $ sudo nixos-rebuild switch
 ```
 
-If you did not have a `flake.nix` file, and you did not want to create one, we explain a non-flake way to install Kobweb
-later in this document.
+*(If you did not have a `flake.nix` file, and you did not want to create one, we explain a non-flake way to install Kobweb
+later in this document.)*
 
 ### Updating Kobweb
 
@@ -133,13 +171,13 @@ $ nix profile upgrade kobweb-cli-src
 ```bash
 $ cd /etc/nixos
 $ nix flake update kobweb
-$ sudo nixos-rebuild switch 
+$ sudo nixos-rebuild switch
 ```
 
 ### The no-flake zone
 
 If you have a Nix installation where you don't have or want flakes enabled, you can still use this project to help you
-install the Kobweb CLI. 
+install the Kobweb CLI.
 
 #### Building Kobweb
 
@@ -170,7 +208,6 @@ We can use `fetchTarball`, provided by Nix, for this.
 Edit `/etc/nixos/configuration.nix`, and search for `environment.systemPackages` in the file (it may be commented out if you
 haven't added your first package yet). We'll use a `let ... in` block to define the `kobweb` variable.
 ```nix
-programs.nix-ld.enable = true; # So Kotlin/JS works
 environment.systemPackages = let
   kobwebRepo = fetchTarball "https://github.com/varabyte/kobweb-cli-nix/archive/v0.9.23.tar.gz";
   kobweb = import kobwebRepo { inherit pkgs; };
@@ -180,7 +217,7 @@ in with pkgs; [
 ```
 > [!IMPORTANT]
 > Note that, in this case, we suggest pinning the URL to a specific version, unlike the flake version earlier.
-> Technically, you can set the URL use `main` instead, as
+> Technically, you can set the URL to use `main` instead, as
 > in `"https://github.com/varabyte/kobweb-cli-nix/archive/main.tar.gz"`, and that would work! However...
 >
 > With the flake version, the user is in control of when kobweb gets upgraded. With the non-flake version, referencing
@@ -213,4 +250,4 @@ The (minor!) modifications we applied on top of the original work:
 
 We do not intend to maintain this list of modifications going forward (or honestly expect it to change much outside of
 version increases), but you can always see a full accounting of changes by
-visiting https://github.com/varabyte/kobweb-cli-nix/commits/main/. 
+visiting https://github.com/varabyte/kobweb-cli-nix/commits/main/.
