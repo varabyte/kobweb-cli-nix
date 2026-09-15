@@ -12,12 +12,13 @@
     overlays.default = import ./overlay.nix;
 
     packages = forAllSystems (system: let
-      pkgs = import nixpkgs { inherit system; };
-      kobweb-cli-bin = pkgs.callPackage ./pkgs/kobweb-cli-bin/package.nix { };
-      kobweb-cli-src = pkgs.callPackage ./pkgs/kobweb-cli-src/package.nix { };
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = [ self.overlays.default ];
+      };
     in {
-      inherit kobweb-cli-bin kobweb-cli-src;
-      default = kobweb-cli-bin;
+      inherit (pkgs) kobweb-cli-bin kobweb-cli-src;
+      default = pkgs.kobweb-cli-bin;
     });
   };
 }
