@@ -208,11 +208,16 @@ We can use `fetchTarball`, provided by Nix, for this.
 Edit `/etc/nixos/configuration.nix`, and search for `environment.systemPackages` in the file (it may be commented out if you
 haven't added your first package yet). We'll use a `let ... in` block to define the `kobweb` variable.
 ```nix
-environment.systemPackages = let
-  kobwebRepo = fetchTarball "https://github.com/varabyte/kobweb-cli-nix/archive/v0.9.23.tar.gz";
-  kobweb = import kobwebRepo { inherit pkgs; };
-in with pkgs; [
-  kobweb
+nixpkgs.overlays = let
+  kobwebRepo = fetchTarball {
+    url = "https://github.com/varabyte/kobweb-cli-nix/archive/v0.9.23.tar.gz";
+  };
+in [
+  (import "${kobwebRepo}/overlay.nix")
+];
+
+environment.systemPackages = with pkgs; [
+  kobweb-cli-bin
 ];
 ```
 > [!IMPORTANT]
