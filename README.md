@@ -115,7 +115,8 @@ If you do not have one, you may consider copying this minimal `flake.nix`:
   };
 
   outputs = { self, nixpkgs, kobweb, ... }: {
-    # Replace "<YOUR-HOSTNAME>"
+    # Replace "<YOUR-HOSTNAME>"!!!! In a terminal, run `hostname` to get the value
+    # to use here. Then delete this comment.
     nixosConfigurations.<YOUR-HOSTNAME> = nixpkgs.lib.nixosSystem {
       modules = [
         {
@@ -137,7 +138,7 @@ If you do not have one, you may consider copying this minimal `flake.nix`:
 }
 ```
 > [!IMPORTANT]
-> Replace `<YOUR-HOSTNAME>` above. In a terminal, run `hostname` to get the value to use here.
+> Replace `<YOUR-HOSTNAME>` before continuing! See the comment we left above in the code for how to do this.
 
 > [!WARNING]
 > The first time this flake is built, Nix will fetch the `nixpkgs` repository tree. This requires ~5–6 GiB of bandwidth
