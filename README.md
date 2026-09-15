@@ -91,14 +91,19 @@ outputs = {
       ./configuration.nix
 
       ({ pkgs, ... }: {
-        environment.systemPackages = [
-+         pkgs.kobweb-cli-bin
+        environment.systemPackages = with pkgs; [
++         kobweb-cli-bin # `kobweb-cli-src` could also work here 
         ];
       })
     ];
   };
 };
 ```
+
+> [!NOTE]
+> For simplicity, we assumed a `flake.nix` where everything is all contained in a single file, but your own system may
+> have a different location where you add packages to `environment.systemPackages` . Adding `kobweb-cli-bin` there instead
+> should also work fine!
 
 If you do not have one, you may consider copying this minimal `flake.nix`:
 ```nix
