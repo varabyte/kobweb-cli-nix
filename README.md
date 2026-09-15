@@ -206,14 +206,17 @@ Once built, you can call `./result/bin/kobweb` to run the CLI or symlink it to a
 You can have Nix manage downloading and building the Kobweb CLI for you, instead of doing it yourself with `nix-build`.
 We can use `fetchTarball`, provided by Nix, for this.
 
+> [!IMPORTANT]
+> We will need to pass a version and a sha256 hash into `fetchTarball`; grab these values from [VERSIONS.md](VERSIONS.md).
+
 Edit `/etc/nixos/configuration.nix`, and search for `environment.systemPackages` in the file (it may be commented out if
 you haven't added your first package yet). We'll use the Nix overlays system to make our CLI packages available in
 `pkgs`, and then add whichever one we prefer as a system package:
 ```nix
 nixpkgs.overlays = let
   kobwebRepo = fetchTarball {
-    url = "https://github.com/varabyte/kobweb-cli-nix/archive/v0.9.23.tar.gz";
-    sha256 = "sha256-1J1sVEcJuogf5w+q2IebbuIizRnzhZvhtYdc9jTXu/4=";
+    url = "https://github.com/varabyte/kobweb-cli-nix/archive/vX.Y.Z.tar.gz";
+    sha256 = "sha256-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX=";
   };
 in [
   (import "${kobwebRepo}/overlay.nix")
@@ -224,9 +227,9 @@ environment.systemPackages = with pkgs; [
 ];
 ```
 > [!IMPORTANT]
-> Note that, in this case, we suggest pinning the URL to a specific version / sha, unlike the flake version earlier.
-> Technically, you can set the URL to use `main` instead, as
-> in `"https://github.com/varabyte/kobweb-cli-nix/archive/main.tar.gz"`, and that would work! However...
+> Note that we suggest pinning the URL to a specific version / sha, unlike the flake version earlier. Technically, you
+> can set the URL to use `main` instead, as in `"https://github.com/varabyte/kobweb-cli-nix/archive/main.tar.gz"`, and
+> leave out the hash, and that would work! However...
 >
 > With the flake version, the user is in control of when kobweb gets upgraded. With the non-flake version, referencing
 > `main` would result in the Kobweb CLI being upgraded as a side effect when someone went to rebuild their NixOS system
@@ -240,23 +243,13 @@ And then rebuild:
 $ sudo nixos-rebuild switch
 ```
 
-If you get notified of a new version later, simply update the kobweb metadata in `/etc/nixos/configuration.nix`.
-Again, the latest values are:
-```nix
-kobwebRepo = fetchTarball {
-  url = "https://github.com/varabyte/kobweb-cli-nix/archive/v0.9.23.tar.gz";
-  sha256 = "sha256-1J1sVEcJuogf5w+q2IebbuIizRnzhZvhtYdc9jTXu/4=";
-};
-```
-
-and rebuild:
+If you get notified of a new version later, simply update the kobweb metadata in `/etc/nixos/configuration.nix` with
+latest. [VERSIONS.md](VERSIONS.md) will have be updated at that time. And then, again, rebuild:
 ```bash
 $ sudo nixos-rebuild switch
 ```
 
 > [!TIP]
-> See https://github.com/varabyte/kobweb-cli-nix/tags for the list of available versions.
->
 > If you ever want to let Nix tell you what `sha256` value to use for a fetch, you can set `sha256 = ""`. At that point, you
 > will get an error when rebuilding the system, which will include the correct hash to replace the hash placeholder
 > with.
